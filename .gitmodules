@@ -1,0 +1,3 @@
+[submodule "LittleHelpers"]
+	path = LittleHelpers
+	url = https://github.com/ThatJanGuy/LittleHelpers
