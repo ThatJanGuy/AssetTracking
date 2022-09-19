@@ -8,11 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\LittleHelpers\LittleHelpers\LittleHelpers.csproj" />
+    <Compile Remove="Test\**" />
+    <EmbeddedResource Remove="Test\**" />
+    <None Remove="Test\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Test\" />
+    <ProjectReference Include="..\..\LittleHelpers\LittleHelpers\LittleHelpers.csproj" />
   </ItemGroup>
 
 </Project>

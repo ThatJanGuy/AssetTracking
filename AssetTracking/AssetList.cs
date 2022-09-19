@@ -166,17 +166,24 @@ namespace AssetTracking
                     new Asset("Laptop", "Dell", "Latitude 4711", "Malmö", DateTime.Parse("2020-05-16"), 1200, "SEK"),
                     new Asset("Laptop", "HP", "Mega 12", "Malmö", DateTime.Parse("2020-08-06"), 1538, "SEK"),
                     new Asset("Phone", "Apple", "iPhone X", "Copenhagen", DateTime.Parse("2018-05-16"), 900, "DKK"),
+                    new Asset("Toilet paper", "Lambi", "Xtra soft", "Copenhagen", DateTime.Parse("2020-02-16"), 12, "DKK"),
                     new Asset("Laptop", "Apple", "MacBook Air", "Hamburg", DateTime.Parse("2019-11-21"), 2520, "EUR"),
                     new Asset("Computer", "Unknown", "Unknown", "Hamburg", DateTime.Parse("2022-03-15"), 7500, "EUR"),
                     new Asset("Phone", "Google", "Pixel", "Malmö", DateTime.Parse("2021-02-18"), 1500, "SEK"),
-                    new Asset("Laptop", "Dell", "Latitude 0815", "Hamburg", DateTime.Parse("2022-05-16"), 750, "EUR"),
-                    new Asset("Laptop", "Dell", "Latitude 0815", "Copenhagen", DateTime.Parse("2022-05-16"), 750, "DKK")
+                    new Asset("Laptop", "Dell", "Latitude 0815", "Hamburg", DateTime.Parse("2020-03-01"), 750, "EUR"),
+                    new Asset("Laptop", "Dell", "Latitude 0815", "Copenhagen", DateTime.Parse("2019-10-16"), 750, "DKK")
                 }
             );
         }
 
         public void Display()
         {
+            // Setting variables to calculate whether or nor a line
+            // shall be written in a warning color later.
+            int lifeTimeYears = 3;
+            int yellowWarningMonths = 6;
+            int redWarningMonths = 3;
+
             Console.Clear();
             // Catches nulled asset lists to avoid later references to null.
             if (this.assets == null)
@@ -188,7 +195,7 @@ namespace AssetTracking
                 return;
             }
 
-            // Populates _localPriceToday field with output from currencyConverter.
+            // Populates localPriceToday field with output from currencyConverter.
             // Doing it right at the time of displaying the data makes sure the
             // amounts really are the latest. In a setting with proper data storage
             // this should be done when fetching the data and after an appropriate
@@ -222,7 +229,20 @@ namespace AssetTracking
 
             foreach (Asset asset in outputList)
             {
-                Console.WriteLine(
+                bool warningColor = false;
+
+                if (asset.PurchaseDate.Value.AddYears(lifeTimeYears) < DateTime.Today.AddMonths(redWarningMonths))
+                {
+                    warningColor = true;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                else if (asset.PurchaseDate.Value.AddYears(lifeTimeYears) < DateTime.Today.AddMonths(yellowWarningMonths))
+                {
+                    warningColor = true;
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+
+                    Console.WriteLine(
                     asset.Type.ToString().PadRight(19) + "| " +
                     asset.Brand.ToString().PadRight(10) + "| " +
                     asset.Model.ToString().PadRight(14) + "| " +
@@ -236,6 +256,12 @@ namespace AssetTracking
                     asset.Currency.ToString().PadRight(15) + "| " +
                     asset.LocalPriceToday.ToString().PadLeft (19)
                 );
+
+                if (warningColor)
+                {
+                    Console.ResetColor();
+                    warningColor = false;
+                }
             }
         }
     }
