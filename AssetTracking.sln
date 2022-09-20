@@ -5,8 +5,6 @@ VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssetTracking", "AssetTracking\AssetTracking.csproj", "{102596AB-D66D-4404-B458-4A5B0EFE966E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LittleHelpers", "..\LittleHelpers\LittleHelpers\LittleHelpers.csproj", "{55062C99-D317-4F85-BB5D-2F25F90D894D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{102596AB-D66D-4404-B458-4A5B0EFE966E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{102596AB-D66D-4404-B458-4A5B0EFE966E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{102596AB-D66D-4404-B458-4A5B0EFE966E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55062C99-D317-4F85-BB5D-2F25F90D894D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55062C99-D317-4F85-BB5D-2F25F90D894D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55062C99-D317-4F85-BB5D-2F25F90D894D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55062C99-D317-4F85-BB5D-2F25F90D894D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -13,8 +13,4 @@
     <None Remove="Test\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\LittleHelpers\LittleHelpers\LittleHelpers.csproj" />
-  </ItemGroup>
-
 </Project>
