@@ -225,6 +225,7 @@ namespace AssetTracking
 
             // Create a nice heading for the output table.
             MakeHeading(
+                "(ID)".PadRight(6) + "| " +
                 "Type".PadRight(19) + "| " +
                 "Brand".PadRight(10) + "| " +
                 "Model".PadRight(14) + "| " +
@@ -235,35 +236,37 @@ namespace AssetTracking
                 "Local price today".PadRight(19)
             );
 
-            foreach (Asset asset in outputList)
+
+            for ( int i = 0; i < outputList.Count; i++)
             {
                 bool warningColor = false;
 
-                if (asset.PurchaseDate.Value.AddYears(lifeTimeYears) < DateTime.Today.AddMonths(redWarningMonths))
+                if (outputList[i].PurchaseDate.Value.AddYears(lifeTimeYears) < DateTime.Today.AddMonths(redWarningMonths))
                 {
                     warningColor = true;
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
-                else if (asset.PurchaseDate.Value.AddYears(lifeTimeYears) < DateTime.Today.AddMonths(yellowWarningMonths))
+                else if (outputList[i].PurchaseDate.Value.AddYears(lifeTimeYears) < DateTime.Today.AddMonths(yellowWarningMonths))
                 {
                     warningColor = true;
                     Console.ForegroundColor = ConsoleColor.Yellow;
                 }
 
                     Console.WriteLine(
-                    asset.Type.ToString().PadRight(19) + "| " +
-                    asset.Brand.ToString().PadRight(10) + "| " +
-                    asset.Model.ToString().PadRight(14) + "| " +
-                    asset.Office.ToString().PadRight(10) + "| " +
-                    // Since DateTime? is nullable the .Value member has to be called to allow
-                    // for formating the string with .ToString. This will, however, throw
-                    // an exception if .PriceInUSD is null. In this case this problem is handled
-                    // by the .GetDateTime() method of LittleHelpers. Empty or null can't pass it.
-                    asset.PurchaseDate.Value.ToString("yyyy-MM-dd").PadRight(15) + "| " +
-                    asset.PriceInUSD.ToString().PadRight(15) + "| " +
-                    asset.Currency.ToString().PadRight(15) + "| " +
-                    asset.LocalPriceToday.ToString().PadLeft (19)
-                );
+                        i.ToString().PadRight(6) + "| " +
+                        outputList[i].Type.ToString().PadRight(19) + "| " +
+                        outputList[i].Brand.ToString().PadRight(10) + "| " +
+                        outputList[i].Model.ToString().PadRight(14) + "| " +
+                        outputList[i].Office.ToString().PadRight(10) + "| " +
+                        // Since DateTime? is nullable the .Value member has to be called to allow
+                        // for formating the string with .ToString. This will, however, throw
+                        // an exception if .PriceInUSD is null. In this case this problem is handled
+                        // by the .GetDateTime() method of LittleHelpers. Empty or null can't pass it.
+                        outputList[i].PurchaseDate.Value.ToString("yyyy-MM-dd").PadRight(15) + "| " +
+                        outputList[i].PriceInUSD.ToString().PadRight(15) + "| " +
+                        outputList[i].Currency.ToString().PadRight(15) + "| " +
+                        outputList[i].LocalPriceToday.ToString().PadLeft (19)
+                    );
 
                 if (warningColor)
                 {
