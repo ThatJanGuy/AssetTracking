@@ -9,7 +9,7 @@ namespace AssetTracking
 {
     internal class AssetList
     {
-        private List<Asset>? assets = new();
+        private List<Asset> assets;
         private CurrencyConverter currencyConverter = new();
         private Dictionary<string, string> Offices = new Dictionary<string, string>
         {
@@ -17,6 +17,11 @@ namespace AssetTracking
             {"Copenhagen", "DKK"},
             {"Hamburg", "EUR"}
         };
+
+        public AssetList()
+        {
+            assets = new List<Asset>();
+        }
 
         public void AddAsset()
         // Collects data from the command line and creates a new Asset
