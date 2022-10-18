@@ -11,15 +11,9 @@
         public static void ColoredText(string text, string color)
         {
             if (Enum.TryParse<ConsoleColor>(color, out ConsoleColor setColor))
-            {
                 ColoredText(text, setColor);
-            }
             else
-            {
-                ColoredText(
-                    "ProgrammerNeedsAHeadCheck_Error: Color not found in ConsoleColor Enum.",
-                    ConsoleColor.Yellow);
-            }
+                ColoredText("ProgrammerNeedsAHeadCheck_Error: Color not found in ConsoleColor Enum.", ConsoleColor.Yellow);
         }
 
         public static void ColoredText(string text, ConsoleColor color)
@@ -38,7 +32,7 @@
         // Returns: Nothing 
         public static void MakeHeading(string heading)
         {
-            MakeHeading(heading, '-'); 
+            MakeHeading(heading, '-');
         }
 
         public static void MakeHeading(string heading, char lineChar)
@@ -60,26 +54,14 @@
             List<string> words = new();
             string output = "";
 
-            foreach(string word in input.Split(' '))
+            foreach (string word in input.Split(' '))
             {
-                if (word.Trim().Length == 0)
-                {
-                    continue;
-                }
-                else if (word.Trim().Length == 1)
-                {
-                    words.Add(word.ToUpper());
-                }
-                else
-                {
-                    words.Add(word[0].ToString().ToUpper() + word.Substring(1));
-                }
+                if (word.Trim().Length == 0) continue;
+                else if (word.Trim().Length == 1) words.Add(word.ToUpper());
+                else words.Add(word[0].ToString().ToUpper() + word.Substring(1));
             }
 
-            foreach (string word in words)
-            {
-                output += word + " ";
-            }
+            foreach (string word in words) output += word + " ";
 
             return output.Trim();
         }

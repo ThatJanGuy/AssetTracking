@@ -22,7 +22,7 @@
             if (exitTerm.Trim().Split(' ').Length > 1)
             {
                 TextManipulation.ColoredText(
-                    "ProgrammerNeedsAHeadCheck_Error: exitTerm needs to a a single word.\n",
+                    "ProgrammerNeedsAHeadCheck_Error: exitTerm needs to be a single word.\n",
                     ConsoleColor.Yellow
                     );
             }
@@ -61,7 +61,7 @@
         //          - Set the out bool to true when the read string matches
         //          the parameter string. Not case sensitive.
         //          - Reject the input if it is not between the int parameters.
-        // Returns: A string or null when invalid.
+        // Returns: An int or null when invalid.
         //          A boolean to the out variable.
         public static int? GetInt(out bool exit)
         {
@@ -91,6 +91,22 @@
                 return null;
             }
 
+            if (min < int.MinValue)
+            {
+                TextManipulation.ColoredText(
+                    "ProgrammerNeedsAHeadCheck_Error: min can't be lower than int.MinValue, which is " + int.MinValue + ".\n",
+                    ConsoleColor.Yellow
+                    );
+            }
+
+            if (max > int.MaxValue)
+            {
+                TextManipulation.ColoredText(
+                    "ProgrammerNeedsAHeadCheck_Error: max can't be lower than int.MaxValue, which is " + int.MaxValue + ".\n",
+                    ConsoleColor.Yellow
+                    );
+            }
+
             if (min > max)
             {
                 // This needs to become an exception error
@@ -111,16 +127,18 @@
                 exit = false;
                 return null;
             }
-            else if (!int.TryParse(input, out int value))
+
+            if (!int.TryParse(input, out int value))
             {
                 TextManipulation.ColoredText(
-                    "Only integers are accepted!\n",
+                    "Only integers are accepted.\n",
                     ConsoleColor.Red
                     );
                 exit = false;
                 return null;
             }
-            else if ((result < min || result > max) !& (min == max))
+
+            if ((value < min || value > max)! & (min != max))
             {
                 TextManipulation.ColoredText(
                     $"Value must be between {min} and {max} inclusive.\n",
@@ -180,6 +198,22 @@
                 return null;
             }
 
+            if (min < decimal.MinValue)
+            {
+                TextManipulation.ColoredText(
+                    "ProgrammerNeedsAHeadCheck_Error: min can't be lower than decimal.MinValue, which is " + decimal.MinValue + ".\n",
+                    ConsoleColor.Yellow
+                    );
+            }
+
+            if (max > decimal.MaxValue)
+            {
+                TextManipulation.ColoredText(
+                    "ProgrammerNeedsAHeadCheck_Error: max can't be lower than decimal.MaxValue, which is " + decimal.MaxValue + ".\n",
+                    ConsoleColor.Yellow
+                    );
+            }
+
             if (min > max)
             {
                 // This needs to become an exception error
@@ -210,7 +244,7 @@
                 exit = false;
                 return null;
             }
-            else if ((result < min || result > max) !& (min == max))
+            else if ((result < min || result > max)! & (min == max))
             {
                 TextManipulation.ColoredText(
                     $"Value must be between {min} and {max} inclusive.\n",
@@ -251,7 +285,7 @@
             if (exitTerm.Trim().Split(' ').Length > 1)
             {
                 TextManipulation.ColoredText(
-                    "ProgrammerNeedsAHeadCheck_Error: exitTerm needs to a a single word.\n",
+                    "ProgrammerNeedsAHeadCheck_Error: exitTerm needs to be a single word.\n",
                     ConsoleColor.Yellow
                     );
             }
