@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using static LittleHelpers.GetInput;
+using static LittleHelpers.TextManipulation;
+
 
 namespace AssetTracking
 {
@@ -42,13 +45,13 @@ namespace AssetTracking
                 string? currency = null;
 
                 Console.Clear();
-                TextManipulation.MakeHeading("Create a new asset ('x' to exit)");
+                MakeHeading("Create a new asset ('x' to exit)");
                 Console.WriteLine("\nPlease enter the following information:");
 
                 while (string.IsNullOrEmpty(type)) 
                 {
                     Console.Write("Type of asset ".PadRight(21) + "> ");
-                    type = GetInput.GetString(out exit, "x");
+                    type = GetString(out exit, "x");
                     if (exit) break;
                 }
                 if (exit) break;
@@ -56,7 +59,7 @@ namespace AssetTracking
                 while (string.IsNullOrEmpty(brand)) 
                 {
                     Console.Write("Brand ".PadRight(21) + "> ");
-                    brand = GetInput.GetString(out exit, "x");
+                    brand = GetString(out exit, "x");
                     if (exit) break;
                 }
                 if (exit) break;
@@ -64,7 +67,7 @@ namespace AssetTracking
                 while (string.IsNullOrEmpty(model)) 
                 {
                     Console.Write("Model ".PadRight(21) + "> ");
-                    model = GetInput.GetString(out exit, "x");
+                    model = GetString(out exit, "x");
                     if (exit) break;
                 }
                 if (exit) break;
@@ -72,9 +75,9 @@ namespace AssetTracking
                 while (string.IsNullOrEmpty(office)) 
                 {
                     Console.Write("Used at which office ".PadRight(21) + "> ");
-                    office = GetInput.GetString(out exit, "x");
+                    office = GetString(out exit, "x");
                     if (exit) break;
-                    if (!Offices.ContainsKey(TextManipulation.ToTitle(office)))
+                    if (!Offices.ContainsKey(ToTitle(office)))
                     {
                         List<string>? outputList = new();
                         string? outputString = null;
@@ -94,7 +97,7 @@ namespace AssetTracking
                             }
                         }
 
-                        TextManipulation.ColoredText(
+                        ColoredText(
                             "Office not available!\n" +
                             "Available options are:\n" +
                             outputString,
@@ -104,7 +107,7 @@ namespace AssetTracking
                     }
                     else
                     {
-                        office = TextManipulation.ToTitle(office);
+                        office = ToTitle(office);
                         currency = Offices[office];
                     }
                 }
@@ -113,7 +116,7 @@ namespace AssetTracking
                 while (purchaseDate == null)
                 {
                     Console.Write("Date of purchase ".PadRight(21) + "> ");
-                    purchaseDate = GetInput.GetDateTime(out exit, "x");
+                    purchaseDate = GetDateTime(out exit, "x");
                     if (exit) break;
                 }
                 if (exit) break;
@@ -121,7 +124,7 @@ namespace AssetTracking
                 while (priceInUSD == null)
                 {
                     Console.Write("Costs of purchase (in USD) ".PadRight(21) + "> ");
-                    priceInUSD = GetInput.GetDecimal(out exit, "x");
+                    priceInUSD = GetDecimal(out exit, "x");
                     if (exit) break;
                 }
                 if (exit) break;
@@ -132,7 +135,7 @@ namespace AssetTracking
                 while (string.IsNullOrEmpty(currency))
                 {
                     Console.Write("Local currency ".PadRight(21) + "> ");
-                    currency = GetInput.GetString(out exit, "x");
+                    currency = GetString(out exit, "x");
                     if (exit) break;
 
                     // Evaluates if currencyConverter knows the currency.
@@ -146,7 +149,7 @@ namespace AssetTracking
                         }
                         else
                         {
-                            TextManipulation.ColoredText(
+                            ColoredText(
                                 "Currency not available!\n" +
                                 "Available options are:\n" +
                                 currencyConverter.DisplayCurrencies() +
@@ -193,7 +196,7 @@ namespace AssetTracking
             // Catches nulled asset lists to avoid later references to null.
             if (this.assets == null)
             {
-                TextManipulation.ColoredText("No assets in list!\n" +
+                ColoredText("No assets in list!\n" +
                     "Populate list before calling an output.\n",
                     ConsoleColor.Yellow
                 );
@@ -221,7 +224,7 @@ namespace AssetTracking
 
 
             // Create a nice heading for the output table.
-            TextManipulation.MakeHeading(
+            MakeHeading(
                 "Type".PadRight(19) + "| " +
                 "Brand".PadRight(10) + "| " +
                 "Model".PadRight(14) + "| " +

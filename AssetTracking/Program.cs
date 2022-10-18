@@ -1,6 +1,8 @@
 ﻿using AssetTracking;
 using LittleHelpers;
 using System.Globalization;
+using static LittleHelpers.GetInput;
+using static LittleHelpers.TextManipulation;
 
 CurrencyConverter currencyConverter = new CurrencyConverter();
 AssetList assetList = new AssetList();
@@ -15,7 +17,7 @@ while (true)
 
     if ( input != 'y' && input != 'n')
     {
-        TextManipulation.ColoredText(
+        ColoredText(
             "Invalid input. Only 'y' or 'n' allowed.",
             "Red"
             );
