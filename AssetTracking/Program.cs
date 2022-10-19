@@ -8,28 +8,15 @@ using static LittleHelpers.TextManipulation;
 CurrencyConverter currencyConverter = new CurrencyConverter();
 AssetList assetList = new AssetList();
 CultureInfo culture = CultureInfo.InvariantCulture;
+DbSession _context = new DbSession();
+
+
 
 // Add a bunch of test data to make function checking simpler.
 Console.Clear();
-while (true)
-{
-    Console.WriteLine("Would you like to add some test data? (y/n)");
-    char input = Console.ReadKey().KeyChar;
 
-    if ( input != 'y' && input != 'n')
-    {
-        ColoredText(
-            "Invalid input. Only 'y' or 'n' allowed.",
-            "Red"
-            );
-        continue;
-    }
+assetList.LoadAssets();
 
-    if (input == 'n') break;
-
-    assetList.AddTestData();
-    break;
-}
 
 while (true)
 {
