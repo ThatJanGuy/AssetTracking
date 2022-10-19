@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AssetTracking
 {
-    internal class AssetContext:DbContext
+    internal class DbSession:DbContext
     {
         public DbSet<Asset> Assets { get; set; }
 
