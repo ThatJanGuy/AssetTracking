@@ -1,4 +1,5 @@
 ﻿using LittleHelpers;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,7 +15,7 @@ namespace AssetTracking
     {
         private List<Asset> assets;
         private CurrencyConverter currencyConverter = new();
-        private Dictionary<string, string> Offices = new Dictionary<string, string>
+        private Dictionary<string, string> offices = new Dictionary<string, string>
         {
             {"Malmö", "SEK"},
             {"Copenhagen", "DKK"},
@@ -23,7 +24,7 @@ namespace AssetTracking
 
         public AssetList()
         {
-            assets = new List<Asset>();
+            this.assets = new List<Asset>();
         }
 
         public void AddAsset()
@@ -77,12 +78,12 @@ namespace AssetTracking
                     Console.Write("Used at which office ".PadRight(21) + "> ");
                     office = GetString(out exit, "x");
                     if (exit) break;
-                    if (!Offices.ContainsKey(ToTitle(office)))
+                    if (!offices.ContainsKey(ToTitle(office)))
                     {
                         List<string>? outputList = new();
                         string? outputString = null;
 
-                        outputList = Offices.Keys.ToList();
+                        outputList = offices.Keys.ToList();
                         outputList.Sort();
 
                         for (int i = 0; i < outputList.Count; i++)
@@ -108,7 +109,7 @@ namespace AssetTracking
                     else
                     {
                         office = ToTitle(office);
-                        currency = Offices[office];
+                        currency = offices[office];
                     }
                 }
                 if (exit) break;
@@ -182,6 +183,7 @@ namespace AssetTracking
                     new Asset("Laptop", "Dell", "Latitude 0815", "Copenhagen", DateTime.Parse("2019-10-16"), 750, "DKK")
                 }
             );
+
         }
 
         public void Display()
@@ -272,6 +274,43 @@ namespace AssetTracking
                 {
                     Console.ResetColor();
                     warningColor = false;
+                }
+            }
+        }
+
+        // Connects to database and loads all contained assets into this.Assets.
+        // In case there are no entries in the db the creation of test data is
+        // being offered.
+        public void LoadAssets()
+        {
+            Console.WriteLine("Loading assets from database...");
+            using (DbSession context = new DbSession())
+            {
+                context.Database.EnsureCreated();
+                this.assets = context.Assets.ToList();
+            }
+            Console.WriteLine( $"{this.assets.Count} assets loaded.");
+
+            if (this.assets.Count <= 0)
+            {
+                while (true)
+                {
+                    Console.WriteLine("Would you like to add some test data? (y/n)");
+                    char input = Console.ReadKey().KeyChar;
+
+                    if (input != 'y' && input != 'n')
+                    {
+                        ColoredText(
+                            "Invalid input. Only 'y' or 'n' allowed.",
+                            "Red"
+                            );
+                        continue;
+                    }
+
+                    if (input == 'n') break;
+
+                    AddTestData();
+                    break;
                 }
             }
         }
