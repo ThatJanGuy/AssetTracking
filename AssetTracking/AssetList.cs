@@ -16,11 +16,11 @@ namespace AssetTracking
     internal class AssetList
     {
         private List<Asset> assets;
-        private DbContext _context;
+        private DbSession _context;
         private CurrencyConverter currencyConverter;
         
 
-        public AssetList(DbContext context, CurrencyConverter currencyConverter)
+        public AssetList(DbSession context, CurrencyConverter currencyConverter)
         {
             this._context = context;
             this.currencyConverter = currencyConverter;
@@ -141,7 +141,7 @@ namespace AssetTracking
 
         public Asset GetAsset(int id)
         {
-            return _context.Assets.Where(asset => asset.id == id);
+            return (Asset)_context.Assets.Where(asset => asset.id == id);
         }
 
         // Connects to database and loads all contained assets into this.Assets.
@@ -153,7 +153,6 @@ namespace AssetTracking
 
             this._context.Database.EnsureCreated();
             this.assets = this._context.Assets.ToList();
-            _context.
             
             Console.WriteLine( $"{this.assets.Count} assets loaded.");
 
@@ -179,7 +178,6 @@ namespace AssetTracking
                     break;
                 }
             }
-
             GetLocalPriceToday(ref this.assets);
         }
 
