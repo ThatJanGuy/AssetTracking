@@ -10,7 +10,7 @@ namespace AssetTracking
 {
     internal class DbSession:DbContext
     {
-        public DbSet<Asset> Assets { get; set; }
+        public DbSet<Asset>? Assets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

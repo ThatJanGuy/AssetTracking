@@ -1,5 +1,7 @@
 ﻿using LittleHelpers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,158 +16,49 @@ namespace AssetTracking
     internal class AssetList
     {
         private List<Asset> assets;
-        private CurrencyConverter currencyConverter = new();
-        private Dictionary<string, string> offices = new Dictionary<string, string>
-        {
-            {"Malmö", "SEK"},
-            {"Copenhagen", "DKK"},
-            {"Hamburg", "EUR"}
-        };
+        private DbContext _context;
+        private CurrencyConverter currencyConverter;
+        
 
-        public AssetList()
+        public AssetList(DbContext context, CurrencyConverter currencyConverter)
         {
+            this._context = context;
+            this.currencyConverter = currencyConverter;
             this.assets = new List<Asset>();
         }
 
-        public void AddAsset()
-        // Collects data from the command line and creates a new Asset
-        // that it the adds to assetList. Uses the GetInput functions
-        // of LittleHelpers a lot. They set the bool exit to true when
-        // the user triggers the exit condition.
+        public bool AddAsset(Asset asset)
+        // Gets passed an Asset, checks for critical fields and either rejects the
+        // Asset or adds it to the _context.
         {
-            while (true)
+            if (!string.IsNullOrEmpty(asset.Currency))
             {
-                bool exit = false;
-
-                string? type = null;
-                string? brand = null;
-                string? model = null;
-                string? office = null;
-                DateTime? purchaseDate = null;
-                decimal? priceInUSD = null;
-                string? currency = null;
-
-                Console.Clear();
-                MakeHeading("Create a new asset ('x' to exit)");
-                Console.WriteLine("\nPlease enter the following information:");
-
-                while (string.IsNullOrEmpty(type)) 
-                {
-                    Console.Write("Type of asset ".PadRight(21) + "> ");
-                    type = GetString(out exit, "x");
-                    if (exit) break;
-                }
-                if (exit) break;
-
-                while (string.IsNullOrEmpty(brand)) 
-                {
-                    Console.Write("Brand ".PadRight(21) + "> ");
-                    brand = GetString(out exit, "x");
-                    if (exit) break;
-                }
-                if (exit) break;
-
-                while (string.IsNullOrEmpty(model)) 
-                {
-                    Console.Write("Model ".PadRight(21) + "> ");
-                    model = GetString(out exit, "x");
-                    if (exit) break;
-                }
-                if (exit) break;
-
-                while (string.IsNullOrEmpty(office)) 
-                {
-                    Console.Write("Used at which office ".PadRight(21) + "> ");
-                    office = GetString(out exit, "x");
-                    if (exit) break;
-                    if (!offices.ContainsKey(ToTitle(office)))
-                    {
-                        List<string>? outputList = new();
-                        string? outputString = null;
-
-                        outputList = offices.Keys.ToList();
-                        outputList.Sort();
-
-                        for (int i = 0; i < outputList.Count; i++)
-                        {
-                            if (i < outputList.Count - 1)
-                            {
-                                outputString += outputList[i] + ", ";
-                            }
-                            else
-                            {
-                                outputString += outputList[i] + ".\n";
-                            }
-                        }
-
-                        ColoredText(
-                            "Office not available!\n" +
-                            "Available options are:\n" +
-                            outputString,
-                            "Red"
-                            );
-                        office = null;
-                    }
-                    else
-                    {
-                        office = ToTitle(office);
-                        currency = offices[office];
-                    }
-                }
-                if (exit) break;
-
-                while (purchaseDate == null)
-                {
-                    Console.Write("Date of purchase ".PadRight(21) + "> ");
-                    purchaseDate = GetDateTime(out exit, "x");
-                    if (exit) break;
-                }
-                if (exit) break;
-
-                while (priceInUSD == null)
-                {
-                    Console.Write("Costs of purchase (in USD) ".PadRight(21) + "> ");
-                    priceInUSD = GetDecimal(out exit, "x");
-                    if (exit) break;
-                }
-                if (exit) break;
-
-                // The addition of Offices makes this obsolete, but since currency is already set
-                // the code won't execute anyway. So no harm is done leaving it here for
-                // sentimental reasons.
-                while (string.IsNullOrEmpty(currency))
-                {
-                    Console.Write("Local currency ".PadRight(21) + "> ");
-                    currency = GetString(out exit, "x");
-                    if (exit) break;
-
-                    // Evaluates if currencyConverter knows the currency.
-                    // If not, available currencies are presented and currency
-                    // is set to null and the loop is continued.
-                    if (!string.IsNullOrEmpty(currency))
-                    {
-                        if (currencyConverter.IsCurrency(currency))
-                        {
-                            currency = currency.ToUpper();
-                        }
-                        else
-                        {
-                            ColoredText(
-                                "Currency not available!\n" +
-                                "Available options are:\n" +
-                                currencyConverter.DisplayCurrencies() +
-                                ".\n",
-                                "Red");
-                            currency = null;
-                            // Not strictly necessary. Just here in casse I'll add code later.
-                            continue; 
-                        }
-                    }
-                }
-                if (exit) break;
-
-                this.assets.Add(new Asset(type, brand, model, office, purchaseDate, priceInUSD, currency));
+                ColoredText(
+                    "Currency must be set!\n" +
+                    "Available options are:\n" +
+                    currencyConverter.DisplayCurrencies() +
+                    "\n", ConsoleColor.Red);
+                return false;
             }
+
+            if (currencyConverter.IsCurrency(asset.Currency))
+            {
+                asset.Currency = asset.Currency.ToUpper();
+            }
+            else
+            {
+                ColoredText(
+                    "Requested currency not available!\n" +
+                    "Available options are:\n" +
+                    currencyConverter.DisplayCurrencies() +
+                    ".\n",
+                    "Red");
+                return false;
+            }
+
+            _context.Add(asset);
+            _context.SaveChanges();
+            return true;
         }
 
         public void AddTestData()
@@ -183,47 +76,15 @@ namespace AssetTracking
                     new Asset("Laptop", "Dell", "Latitude 0815", "Copenhagen", DateTime.Parse("2019-10-16"), 750, "DKK")
                 }
             );
-
         }
 
-        public void Display()
+        public void Display(int assetLifeTimeInYears, int assetLifeMonthsLeftForYellowWarning, int assetLifeMonthsLeftForRedWarning)
         {
-            // Setting variables to calculate whether or nor a line
-            // shall be written in a warning color later.
-            int lifeTimeYears = 3;
-            int yellowWarningMonths = 6;
-            int redWarningMonths = 3;
-
             Console.Clear();
-            // Catches nulled asset lists to avoid later references to null.
-            if (this.assets == null)
-            {
-                ColoredText("No assets in list!\n" +
-                    "Populate list before calling an output.\n",
-                    ConsoleColor.Yellow
-                );
-                return;
-            }
 
-            // Populates localPriceToday field with output from currencyConverter.
-            // Doing it right at the time of displaying the data makes sure the
-            // amounts really are the latest. In a setting with proper data storage
-            // this should be done when fetching the data and after an appropriate
-            // amount of time whent by. Otherwise displaying the data would be
-            // necessary to update it, which is highly problematic. But for now it's fine.
-            foreach (Asset asset in this.assets)
-            {
-                asset.LocalPriceToday = currencyConverter.ConvertFromTo("USD", asset.Currency, asset.PriceInUSD);
-            }
-
-            List<Asset> outputList =
-                (
-                from asset in this.assets
-                orderby asset.Office, asset.PurchaseDate
-                select asset
-                ).ToList();
-
-
+            this.assets.OrderBy(asset => asset.Office)
+                    .ThenBy(asset => asset.PurchaseDate)
+                    .ToList();
 
             // Create a nice heading for the output table.
             MakeHeading(
@@ -239,16 +100,16 @@ namespace AssetTracking
             );
 
 
-            for ( int i = 0; i < outputList.Count; i++)
+            for ( int i = 0; i < this.assets.Count; i++)
             {
                 bool warningColor = false;
 
-                if (outputList[i].PurchaseDate.Value.AddYears(lifeTimeYears) < DateTime.Today.AddMonths(redWarningMonths))
+                if (this.assets[i].PurchaseDate.Value.AddYears(assetLifeTimeInYears) < DateTime.Today.AddMonths(assetLifeMonthsLeftForRedWarning))
                 {
                     warningColor = true;
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
-                else if (outputList[i].PurchaseDate.Value.AddYears(lifeTimeYears) < DateTime.Today.AddMonths(yellowWarningMonths))
+                else if (this.assets[i].PurchaseDate.Value.AddYears(assetLifeTimeInYears) < DateTime.Today.AddMonths(assetLifeMonthsLeftForYellowWarning))
                 {
                     warningColor = true;
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -256,18 +117,18 @@ namespace AssetTracking
 
                     Console.WriteLine(
                         i.ToString().PadRight(6) + "| " +
-                        outputList[i].Type.ToString().PadRight(19) + "| " +
-                        outputList[i].Brand.ToString().PadRight(10) + "| " +
-                        outputList[i].Model.ToString().PadRight(14) + "| " +
-                        outputList[i].Office.ToString().PadRight(10) + "| " +
+                        this.assets[i].Type.ToString().PadRight(19) + "| " +
+                        this.assets[i].Brand.ToString().PadRight(10) + "| " +
+                        this.assets[i].Model.ToString().PadRight(14) + "| " +
+                        this.assets[i].Office.ToString().PadRight(10) + "| " +
                         // Since DateTime? is nullable the .Value member has to be called to allow
                         // for formating the string with .ToString. This will, however, throw
                         // an exception if .PriceInUSD is null. In this case this problem is handled
                         // by the .GetDateTime() method of LittleHelpers. Empty or null can't pass it.
-                        outputList[i].PurchaseDate.Value.ToString("yyyy-MM-dd").PadRight(15) + "| " +
-                        outputList[i].PriceInUSD.ToString().PadRight(15) + "| " +
-                        outputList[i].Currency.ToString().PadRight(15) + "| " +
-                        outputList[i].LocalPriceToday.ToString().PadLeft (19)
+                        this.assets[i].PurchaseDate.Value.ToString("yyyy-MM-dd").PadRight(15) + "| " +
+                        this.assets[i].PriceInUSD.ToString().PadRight(15) + "| " +
+                        this.assets[i].Currency.ToString().PadRight(15) + "| " +
+                        this.assets[i].LocalPriceToday.ToString().PadLeft (19)
                     );
 
                 if (warningColor)
@@ -278,17 +139,22 @@ namespace AssetTracking
             }
         }
 
+        public Asset GetAsset(int id)
+        {
+            return _context.Assets.Where(asset => asset.id == id);
+        }
+
         // Connects to database and loads all contained assets into this.Assets.
         // In case there are no entries in the db the creation of test data is
         // being offered.
         public void LoadAssets()
         {
             Console.WriteLine("Loading assets from database...");
-            using (DbSession context = new DbSession())
-            {
-                context.Database.EnsureCreated();
-                this.assets = context.Assets.ToList();
-            }
+
+            this._context.Database.EnsureCreated();
+            this.assets = this._context.Assets.ToList();
+            _context.
+            
             Console.WriteLine( $"{this.assets.Count} assets loaded.");
 
             if (this.assets.Count <= 0)
@@ -312,6 +178,19 @@ namespace AssetTracking
                     AddTestData();
                     break;
                 }
+            }
+
+            GetLocalPriceToday(ref this.assets);
+        }
+
+        // Populates the LocalPriceToday fields of the passed in list of assets.
+        // By having it as its own method it can be used on the assetList but also
+        // temporary lists for sorting, statistics, etc. 
+        private void GetLocalPriceToday(ref List<Asset> inputList)
+        {
+            foreach (Asset asset in inputList)
+            {
+                asset.LocalPriceToday = this.currencyConverter.ConvertFromTo("USD", asset.Currency, asset.PriceInUSD);
             }
         }
     }

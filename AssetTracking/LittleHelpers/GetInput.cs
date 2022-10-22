@@ -1,4 +1,6 @@
-﻿namespace LittleHelpers
+﻿using System.Globalization;
+
+namespace LittleHelpers
 {
     public static class GetInput
     {
@@ -308,7 +310,7 @@
             {
                 TextManipulation.ColoredText(
                     "No legal input!\n" +
-                    "(Format: yyyy-mm-dd)\n",
+                    $"(Format: {CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern})\n",
                     ConsoleColor.Red
                     );
                 exit = false;
