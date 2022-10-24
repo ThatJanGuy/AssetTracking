@@ -64,7 +64,8 @@ MainMenu();
 
 void MainMenu()
 {
-    while (true)
+    bool exitMenu = false;
+    while (!exitMenu)
     {
         Console.Clear();
 
@@ -135,13 +136,14 @@ void MainMenu()
                 }
                 
                 break;
-                /*
+                
             case '4':
 
                 break;
             case 'x':
+                exitMenu = true;
+                break;
 
-                break;*/
             default:
                 ColoredText("\nPlease enter a valid option.\n(Press any key to continue)\n", ConsoleColor.Red);
                 Console.ReadKey();
