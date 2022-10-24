@@ -1,5 +1,6 @@
 ﻿using AssetTracking;
 using LittleHelpers;
+using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 using static LittleHelpers.GetInput;
@@ -138,8 +139,9 @@ void MainMenu()
                 break;
                 
             case '4':
-
+                Statistics();
                 break;
+
             case 'x':
                 exitMenu = true;
                 break;
@@ -179,7 +181,7 @@ int CheckForDb()
 {
     DbSession context = new();
 
-    context.Database.EnsureDeleted();
+    //context.Database.EnsureDeleted();
     context.Database.EnsureCreated();
     return context.Assets.ToList().Count();
 }
@@ -204,7 +206,7 @@ void CreateAsset()
 
         while (string.IsNullOrEmpty(type))
         {
-            Console.Write("Type of asset ".PadRight(21) + "> ");
+            Console.Write("Type of asset ".PadRight(29) + "> ");
             type = GetString(out exit, "x");
             if (exit) break;
         }
@@ -212,7 +214,7 @@ void CreateAsset()
 
         while (string.IsNullOrEmpty(brand))
         {
-            Console.Write("Brand ".PadRight(21) + "> ");
+            Console.Write("Brand ".PadRight(29) + "> ");
             brand = GetString(out exit, "x");
             if (exit) break;
         }
@@ -220,7 +222,7 @@ void CreateAsset()
 
         while (string.IsNullOrEmpty(model))
         {
-            Console.Write("Model ".PadRight(21) + "> ");
+            Console.Write("Model ".PadRight(29) + "> ");
             model = GetString(out exit, "x");
             if (exit) break;
         }
@@ -228,7 +230,7 @@ void CreateAsset()
 
         while (string.IsNullOrEmpty(office))
         {
-            Console.Write("Used at which office ".PadRight(21) + "> ");
+            Console.Write("Used at which office ".PadRight(29) + "> ");
             office = GetString(out exit, "x");
             if (exit) break;
 
@@ -270,7 +272,7 @@ void CreateAsset()
 
         while (purchaseDate == null)
         {
-            Console.Write("Date of purchase ".PadRight(21) + "> ");
+            Console.Write("Date of purchase ".PadRight(29) + "> ");
             purchaseDate = GetDateTime(out exit, "x");
             if (exit) break;
         }
@@ -278,7 +280,7 @@ void CreateAsset()
 
         while (priceInUSD == null)
         {
-            Console.Write("Costs of purchase (in USD) ".PadRight(21) + "> ");
+            Console.Write("Costs of purchase (in USD) ".PadRight(29) + "> ");
             priceInUSD = GetDecimal(out exit, "x");
             if (exit) break;
         }
@@ -542,4 +544,29 @@ void Edit(Asset asset)
         }
     }
 
+}
+
+void Statistics()
+{
+    decimal? totalValue = null;
+    int? numberOfAssets = null;
+    int? assetsInMalmo = null;
+
+    using( DbSession context = new())
+    {
+        totalValue = context.Assets.Select(a => a.PriceInUSD).Sum();
+        numberOfAssets = context.Assets.Count();
+        assetsInMalmo = context.Assets.Where(a => a.Office == "Malmö").Count();
+    }
+
+    Console.Clear();
+    Display(assetLifeTimeInYears, assetLifeMonthsLeftForYellowWarning, assetLifeMonthsLeftForRedWarning);
+
+    MakeHeading("\nStatistical data (examples):");
+    Console.WriteLine( $"Total value of tracked assets:     {totalValue} US$");
+    Console.WriteLine( $"Total number of trackes assets:    {numberOfAssets}");
+    Console.WriteLine( $"Number of trackes assets in Malmö: {assetsInMalmo}");
+
+    Console.WriteLine("\n(Press ANY KEY to CONTINUE.)");
+    Console.ReadKey();
 }
