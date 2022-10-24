@@ -38,15 +38,23 @@
 
             return query.ToList();
         }
+
+        public bool UpdateAsset(Asset asset)
+        {
+            DbSession context = new();
+
+            context.Assets.Update(asset);
+            if (context.SaveChanges() > 0) return true;
+            return false;
+        }
+
         public string UpdateLocalPriceToday()
         {
-            Console.WriteLine("Updating local prices of assets...");
             DbSession context = new();
+            CurrencyConverter currencyConverter = new();
 
             if (!context.Assets.Any())
                 return "No assets found. Operation aborted.";
-
-            CurrencyConverter currencyConverter = new();
 
             foreach (Asset asset in context.Assets)
             {
@@ -54,7 +62,6 @@
             }
 
             int numberOfPricesUpdated = context.SaveChanges();
-
             if (numberOfPricesUpdated == 1)
             {
                 return $"{numberOfPricesUpdated} local price updated.";

@@ -15,7 +15,7 @@ namespace AssetTracking
         ///This shall be filled by data acquired through the ECB API later.
         ///</summary>
         {
-            {"USD", 0.9954M},
+            {"USD", 0.9934M},
             {"SEK", 10.7541M},
             {"DKK", 7.4366M},
             {"EUR", 1M}

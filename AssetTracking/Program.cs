@@ -1,4 +1,7 @@
 ﻿using AssetTracking;
+using LittleHelpers;
+using System.Runtime.CompilerServices;
+using System.Xml.Serialization;
 using static LittleHelpers.GetInput;
 using static LittleHelpers.TextManipulation;
 
@@ -13,12 +16,20 @@ List<Asset> displayList = new();
 int assetLifeTimeInYears = 3;
 int assetLifeMonthsLeftForYellowWarning = 6;
 int assetLifeMonthsLeftForRedWarning = 3;
+// This should turn into ... something else that is more elegant
+// and easier to edit. But for now it will do the job.
+Dictionary<string, string> offices = new Dictionary<string, string>
+        {
+            {"Malmö", "SEK"},
+            {"Copenhagen", "DKK"},
+            {"Hamburg", "EUR"}
+        };
 
 Console.Clear();
 
-Console.WriteLine("Checking Dabtabase...");
+Console.WriteLine("Checking Database...");
 int assetsInDb = CheckForDb();
-Console.WriteLine(assetsInDb + assetsInDb == 1 ? "asset" : "assets" + "found.");
+Console.WriteLine(assetsInDb + (assetsInDb == 1 ? " asset " : " assets ") + "found.");
 if (assetsInDb == 0)
 {
     while (true)
@@ -42,10 +53,9 @@ if (assetsInDb == 0)
         break;
     }
 }
-
 Console.WriteLine(assetList.UpdateLocalPriceToday());
-
 Console.WriteLine("Press ANY KEY to continue.");
+Console.ReadKey();
 
 MainMenu();
 
@@ -79,16 +89,16 @@ void MainMenu()
                 break;
 
             case '2':
-                int? idToEdit = null;
-                while (idToEdit == null)
+                int? positionInDisplayList = null;
+                while (positionInDisplayList == null)
                 {
                     Console.Write("\nEnter the ID of the asset you wish to edit ('c' to cancel) > ");
-                    idToEdit = GetInt(out cancel, "c", 0, displayList.Count - 1);
+                    positionInDisplayList = GetInt(out cancel, "c", 0, displayList.Count - 1);
                     if (cancel) break;
                 }
                 if (cancel) break;
 
-                Edit(displayList[idToEdit.Value].id);
+                Edit(displayList[positionInDisplayList.Value]);
                 break;
             /*
             case '3':
@@ -154,12 +164,6 @@ void CreateAsset()
     while (true)
     {
         bool exit = false;
-        Dictionary<string, string> offices = new Dictionary<string, string>
-        {
-            {"Malmö", "SEK"},
-            {"Copenhagen", "DKK"},
-            {"Hamburg", "EUR"}
-        };
 
         string? type = null;
         string? brand = null;
@@ -266,8 +270,9 @@ void CreateAsset()
     }
 }
 
-void Display(int assetLifeTimeInYears = 0, int assetLifeMonthsLeftForYellowWarning = 0, int assetLifeMonthsLeftForRedWarning = 0, bool displayToEdit = false, int idToDisplayToEdit = 0)
+void Display(int assetLifeTimeInYears = 0, int assetLifeMonthsLeftForYellowWarning = 0, int assetLifeMonthsLeftForRedWarning = 0, bool displayToEdit = false, Asset? editedAsset = null)
 {
+    assetList.UpdateLocalPriceToday();
     displayList = assetList.GetAssetList();
 
     if (displayToEdit)
@@ -293,10 +298,10 @@ void Display(int assetLifeTimeInYears = 0, int assetLifeMonthsLeftForYellowWarni
             " -> 4".PadRight(10) + "| " +
             " -> 5".PadRight(15) + "| " +
             " -> 6".PadRight(15) + "| " +
-            " -> 7".PadRight(15) + "| " +
+            " --".PadRight(15) + "| " +
             " --".PadRight(19)
         );
-        outputEntry(idToDisplayToEdit);
+        outputEntry(editedAsset, 0);
     }
     else
     {
@@ -315,20 +320,20 @@ void Display(int assetLifeTimeInYears = 0, int assetLifeMonthsLeftForYellowWarni
 
         for (int i = 0; i < displayList.Count; i++)
         {
-            outputEntry(i);
+            outputEntry(displayList[i], i);
         }
     }
 
-    void outputEntry(int id)
+    void outputEntry(Asset asset, int id)
     {
         bool warningColor = false;
 
-        if (displayList[id].PurchaseDate.Value.AddYears(assetLifeTimeInYears) < DateTime.Today.AddMonths(assetLifeMonthsLeftForRedWarning))
+        if (asset.PurchaseDate.Value.AddYears(assetLifeTimeInYears) < DateTime.Today.AddMonths(assetLifeMonthsLeftForRedWarning))
         {
             warningColor = true;
             Console.ForegroundColor = ConsoleColor.Red;
         }
-        else if (displayList[id].PurchaseDate.Value.AddYears(assetLifeTimeInYears) < DateTime.Today.AddMonths(assetLifeMonthsLeftForYellowWarning))
+        else if (asset.PurchaseDate.Value.AddYears(assetLifeTimeInYears) < DateTime.Today.AddMonths(assetLifeMonthsLeftForYellowWarning))
         {
             warningColor = true;
             Console.ForegroundColor = ConsoleColor.Yellow;
@@ -336,24 +341,179 @@ void Display(int assetLifeTimeInYears = 0, int assetLifeMonthsLeftForYellowWarni
 
         Console.WriteLine(
             id.ToString().PadRight(6) + "| " +
-            displayList[id].Type.ToString().PadRight(19) + "| " +
-            displayList[id].Brand.ToString().PadRight(10) + "| " +
-            displayList[id].Model.ToString().PadRight(14) + "| " +
-            displayList[id].Office.ToString().PadRight(10) + "| " +
+            asset.Type.ToString().PadRight(19) + "| " +
+            asset.Brand.ToString().PadRight(10) + "| " +
+            asset.Model.ToString().PadRight(14) + "| " +
+            asset.Office.ToString().PadRight(10) + "| " +
             // Since DateTime? is nullable the .Value member has to be called to allow
             // for formating the string with .ToString. This will, however, throw
             // an exception if .PriceInUSD is null. In this case this problem is handled
             // by the .GetDateTime() method of LittleHelpers. Empty or null can't pass it.
-            displayList[id].PurchaseDate.Value.ToString("yyyy-MM-dd").PadRight(15) + "| " +
-            displayList[id].PriceInUSD.ToString().PadRight(15) + "| " +
-            displayList[id].Currency.ToString().PadRight(15) + "| " +
-            displayList[id].LocalPriceToday.ToString().PadLeft(19)
+            asset.PurchaseDate.Value.ToString("yyyy-MM-dd").PadRight(15) + "| " +
+            asset.PriceInUSD.ToString().PadRight(15) + "| " +
+            asset.Currency.ToString().PadRight(15) + "| " +
+            asset.LocalPriceToday.ToString().PadLeft(19)
         );
 
         if (warningColor)
         {
             Console.ResetColor();
             warningColor = false;
+        }
+    }
+}
+
+void Edit(Asset asset)
+{
+    bool keepEditing = true;
+
+    while (keepEditing)
+    {
+        Console.Clear();
+        Display(0,0,0, true, asset);
+
+        Console.Write("\nWhich value would you like to edit? (1-6, 'x' to exit) > ");
+        char selection = Console.ReadKey().KeyChar;
+
+        switch (selection)
+        {
+            case '1':
+                bool exit = false;
+                string? newType = null;
+
+                Console.Write($"\nOld type: {asset.Type}\n");
+                while (newType == null)
+                {
+                    Console.Write($"New type: ");
+                    newType = GetInput.GetString(out exit, "x");
+                    if (exit) break;
+                }
+                if (exit) break;
+                asset.Type = newType;
+                assetList.UpdateAsset(asset);
+                break;
+
+            case '2':
+                exit = false;
+                string? newBrand = null;
+
+                Console.Write($"\nOld brand: {asset.Brand}\n");
+                while (newBrand == null)
+                {
+                    Console.Write($"New brand: ");
+                    newBrand = GetInput.GetString(out exit, "x");
+                    if (exit) break;
+                }
+                if (exit) break;
+                asset.Brand = newBrand;
+                assetList.UpdateAsset(asset);
+                break;
+
+            case '3':
+                exit = false;
+                string? newModel = null;
+
+                Console.Write($"\nOld model: {asset.Model}\n");
+                while (newModel == null)
+                {
+                    Console.Write($"New model: ");
+                    newModel = GetInput.GetString(out exit, "x");
+                    if (exit) break;
+                }
+                if (exit) break;
+                asset.Model = newModel;
+                assetList.UpdateAsset(asset);
+                break;
+
+            case '4':
+                exit = false;
+                string? newOffice = null;
+
+                Console.Write($"\nOld office: {asset.Office}");
+                while (newOffice == null)
+                {
+                    Console.Write("\nNew office: ");
+                    newOffice = GetString(out exit, "x");
+                    if (exit) break;
+
+                    if (!offices.ContainsKey(ToTitle(newOffice)))
+                    {
+                        List<string>? outputList = new();
+                        string? outputString = null;
+
+                        outputList = offices.Keys.ToList();
+                        outputList.Sort();
+
+                        for (int i = 0; i < outputList.Count; i++)
+                        {
+                            if (i < outputList.Count - 1)
+                            {
+                                outputString += outputList[i] + ", ";
+                            }
+                            else
+                            {
+                                outputString += outputList[i] + ".\n";
+                            }
+                        }
+
+                        ColoredText(
+                            "Office not available!\n" +
+                            "Available options are:\n" +
+                            outputString,
+                            "Red"
+                            );
+                        newOffice = null;
+                    }
+                    else
+                    {
+                        asset.Office = ToTitle(newOffice);
+                        asset.Currency = offices[newOffice];
+                        assetList.UpdateAsset(asset);
+                        break;
+                    }
+                }
+                break;
+
+            case '5':
+                exit = false;
+                DateTime? newDate = null;
+
+                Console.Write($"\nOld purchase date: {asset.PurchaseDate}\n");
+                while (newDate == null)
+                {
+                    Console.Write($"New purchase date: ");
+                    newDate = GetInput.GetDateTime(out exit, "x");
+                    if (exit) break;
+                }
+                if (exit) break;
+                asset.PurchaseDate = newDate;
+                assetList.UpdateAsset(asset);
+                break;
+            
+            case '6':
+                exit = false;
+                decimal? newPrice = null;
+
+                Console.Write($"\nOld price in US$: {asset.PriceInUSD}\n");
+                while (newPrice == null)
+                {
+                    Console.Write($"New price in US$: ");
+                    newPrice = GetInput.GetDecimal(out exit, "x");
+                    if (exit) break;
+                }
+                if (exit) break;
+                asset.PriceInUSD = newPrice;
+                assetList.UpdateAsset(asset);
+                break;
+            
+            case 'x':
+                keepEditing = false;
+                break;
+
+            default:
+                TextManipulation.ColoredText("Please select a valid option.\n(Press any key to continue)\n", ConsoleColor.Red);
+                Console.ReadKey();
+                break;
         }
     }
 
