@@ -37,11 +37,12 @@ if (assetsInDb == 0)
         Console.WriteLine("Would you like to add some test data? (y/n)");
         Console.Write(" > ");
         char input = Console.ReadKey().KeyChar;
+        Console.WriteLine();
 
         if (input != 'y' && input != 'n')
         {
             ColoredText(
-                "Invalid input. Only 'y' or 'n' allowed.",
+                "\nInvalid input. Only 'y' or 'n' allowed.\n",
                 "Red"
                 );
             continue;
@@ -100,20 +101,41 @@ void MainMenu()
 
                 Edit(displayList[positionInDisplayList.Value]);
                 break;
-            /*
+            
             case '3':
                 int? idToDelete = null;
                 while (idToDelete == null)
                 {
                     Console.Write("\nEnter the ID of the asset you wish to delete ('c' to cancel) > ");
-                    idToDelete = GetInt(out cancel, "c", 0, orderedList.Count - 1);
+                    idToDelete = GetInt(out cancel, "c", 0, displayList.Count - 1);
                     if (cancel) break;
                 }
-                if (cancel) Display(assetLifeTimeInYears, assetLifeMonthsLeftForYellowWarning, assetLifeMonthsLeftForRedWarning);
+                if (cancel) break;
 
-                DeleteTransaction(orderedList[(int)idToDelete]);
+                Console.Clear();
+                Display(0, 0, 0, true, displayList[idToDelete.Value]);
+                Console.WriteLine("\nAre you sure you want to delete this asset? (y/n)");
+                Console.Write(" > ");
+                char input = Console.ReadKey().KeyChar;
+
+                if (input != 'y' && input != 'n')
+                {
+                    ColoredText(
+                        "Invalid input. Only 'y' or 'n' allowed.",
+                        "Red"
+                        );
+                    continue;
+                }
+
+                if (input == 'n') break;
+
+                if (assetList.RemoveAsset(displayList[idToDelete.Value]))
+                {
+                    Console.WriteLine("Deletion successful");
+                }
+                
                 break;
-
+                /*
             case '4':
 
                 break;
@@ -155,6 +177,7 @@ int CheckForDb()
 {
     DbSession context = new();
 
+    context.Database.EnsureDeleted();
     context.Database.EnsureCreated();
     return context.Assets.ToList().Count();
 }

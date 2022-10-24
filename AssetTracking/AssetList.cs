@@ -39,6 +39,15 @@
             return query.ToList();
         }
 
+        public bool RemoveAsset(Asset asset)
+        {
+            DbSession context = new();
+
+            context.Assets.Remove(asset);
+            if (context.SaveChanges() > 0) return true;
+            return false;
+        }
+
         public bool UpdateAsset(Asset asset)
         {
             DbSession context = new();
